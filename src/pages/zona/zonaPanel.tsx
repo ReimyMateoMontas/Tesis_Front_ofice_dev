@@ -3,10 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { IconArrowRight } from "@tabler/icons-react";
 import { zonaApi } from "../../api/zonaApi";
 import { MoverAnimalModal } from "./MoverAnimalModal";
-import {
-  ESTADO_BADGE,
-  PLACEHOLDER_ANIMAL,
-} from "../../components/ZonaConstants";
+import { ESTADO_BADGE } from "../../components/ZonaConstants";
+import { animalImg, especieImg } from "../../utils/animalImg";
 import { useAppSelector } from "../../hooks/hooks";
 import type { AnimalEnZona, Zona } from "../../types/index";
 
@@ -69,17 +67,13 @@ export function ZonaPanel({ zona, zonas, onMovimientoRealizado }: Props) {
                 }`}
               >
                 <img
-                  src={
-                    animal.fotografiaUrl && animal.fotografiaUrl.trim() !== ""
-                      ? animal.fotografiaUrl
-                      : PLACEHOLDER_ANIMAL
-                  }
+                  src={animalImg(animal.fotografiaUrl, animal.especie)}
                   alt={animal.nombre}
                   className="w-12 h-12 rounded-lg object-cover "
                   onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    if (img.src !== PLACEHOLDER_ANIMAL)
-                      img.src = PLACEHOLDER_ANIMAL;
+                    (e.target as HTMLImageElement).src = especieImg(
+                      animal.especie,
+                    );
                   }}
                 />
                 <div className="min-w-0 flex-1">

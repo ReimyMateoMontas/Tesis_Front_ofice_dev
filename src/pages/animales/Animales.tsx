@@ -8,10 +8,7 @@ import { AnimalFormModal } from "./AnimalFormModal";
 import { useAppSelector } from "../../hooks/hooks";
 import { formatearEdad } from "../../utils/Edad";
 import { ActionButton } from "../../components/ActionButton";
-
-// Imágenes locales por defecto — colócalas en src/assets/
-import perroImg from "../../assets/Perro.jpg";
-import gatoImg from "../../assets/Gato.png";
+import { especieImg } from "../../utils/animalImg";
 
 const estadoBadge: Record<string, string> = {
   Saludable: "bg-green-100 text-green-700",
@@ -25,14 +22,6 @@ const estadoLabel: Record<string, string> = {
   EnTratamiento: "En tratamiento",
   Critico: "Crítico",
   Recuperado: "Recuperado",
-};
-
-// Imágenes placeholder por especie
-const placeholderImg: Record<string, string> = {
-  Perro: perroImg,
-  Gato: gatoImg,
-  Ave: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&h=300&fit=crop",
-  Otro: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=300&fit=crop",
 };
 
 export function normalizeAnimal(raw: any): Animal {
@@ -223,8 +212,7 @@ function AnimalCard({
   animal: Animal;
   onClick: () => void;
 }) {
-  const tipo = animal.especie ?? "Otro";
-  const fallbackSrc = placeholderImg[tipo] ?? placeholderImg["Otro"];
+  const fallbackSrc = especieImg(animal.especie);
 
   return (
     <div

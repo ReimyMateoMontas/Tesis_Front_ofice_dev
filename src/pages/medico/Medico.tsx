@@ -19,10 +19,8 @@ import { RegistrarVacunaModal } from "./RegistralVacunaModal";
 import { RegistrarFallecimientoModal } from "./RegistrarFallecimientoModal";
 import { useAppSelector } from "../../hooks/hooks";
 import { ActionButton } from "../../components/ActionButton";
+import { animalImg, especieImg } from "../../utils/animalImg";
 import type { Tratamiento } from "../../types/index";
-
-const PLACEHOLDER =
-  "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=80&h=80&fit=crop";
 
 const ESTADO_CONFIG: Record<string, { label: string; badge: string }> = {
   Activo: { label: "Activo", badge: "bg-amber-100 text-amber-700" },
@@ -531,11 +529,11 @@ function TratamientoCard({
     >
       <div className="flex items-start gap-4">
         <img
-          src={t.fotografiaUrl?.trim() || PLACEHOLDER}
+          src={animalImg(t.fotografiaUrl, t.especie)}
           alt={t.animal}
           className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = PLACEHOLDER;
+            (e.target as HTMLImageElement).src = especieImg(t.especie);
           }}
         />
         <div className="flex-1 min-w-0">
@@ -618,11 +616,11 @@ function VacunaCard({ v }: { v: any }) {
     >
       <div className="flex items-start gap-4">
         <img
-          src={v.fotografiaUrl?.trim() || PLACEHOLDER}
+          src={animalImg(v.fotografiaUrl, v.especie)}
           alt={v.animal}
           className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = PLACEHOLDER;
+            (e.target as HTMLImageElement).src = especieImg(v.especie);
           }}
         />
         <div className="flex-1 min-w-0">

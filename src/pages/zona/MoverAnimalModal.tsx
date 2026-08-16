@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { X, ArrowRight, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { zonaApi } from "../../api/zonaApi";
-import { PLACEHOLDER_ANIMAL } from "../../components/ZonaConstants";
+import { animalImg, especieImg } from "../../utils/animalImg";
 import type { AnimalEnZona, Zona } from "../../types/index";
 
 interface Props {
@@ -65,11 +65,11 @@ export function MoverAnimalModal({
           {/* Animal info */}
           <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
             <img
-              src={animal.fotografiaUrl ?? PLACEHOLDER_ANIMAL}
+              src={animalImg(animal.fotografiaUrl, animal.especie)}
               alt={animal.nombre}
               className="w-12 h-12 rounded-lg object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = PLACEHOLDER_ANIMAL;
+                (e.target as HTMLImageElement).src = especieImg(animal.especie);
               }}
             />
             <div>

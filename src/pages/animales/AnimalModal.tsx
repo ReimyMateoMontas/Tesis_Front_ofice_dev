@@ -21,6 +21,7 @@ import { HistorialAnimal } from "../medico/HistorialAnimal";
 import { HistorialMovimientos } from "../zona/HistorialMovimientos";
 import { CambiarZonaModal } from "./CambiarZonaModal";
 import { EditarAnimalModal } from "./EditarAnimalModal";
+import { especieImg } from "../../utils/animalImg";
 import type { Animal } from "../../types";
 
 const estadoBadge: Record<string, string> = {
@@ -34,13 +35,6 @@ const estadoLabel: Record<string, string> = {
   EnTratamiento: "En tratamiento",
   Critico: "Crítico",
   Recuperado: "Recuperado",
-};
-const placeholderImg: Record<string, string> = {
-  Perro:
-    "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=500&fit=crop",
-  Gato: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800&h=500&fit=crop",
-  Ave: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=800&h=500&fit=crop",
-  Otro: "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=800&h=500&fit=crop",
 };
 
 // ── Modal: Actualizar estado de salud ─────────────────────────────────────────
@@ -317,6 +311,7 @@ export function AnimalModal({ animal, onClose }: Props) {
   const [showBaja, setShowBaja] = useState(false);
   const [showZona, setShowZona] = useState(false);
   const [showEditar, setShowEditar] = useState(false);
+  const [showConfirmTrat, setShowConfirmTrat] = useState(false);
 
   const { data: detail } = useQuery<Animal>({
     queryKey: ["animal", animal.id],
@@ -327,8 +322,7 @@ export function AnimalModal({ animal, onClose }: Props) {
   });
 
   const a = detail ?? animal;
-  const tipo = a.especie ?? "Otro";
-  const fallbackSrc = placeholderImg[tipo] ?? placeholderImg["Otro"];
+  const fallbackSrc = especieImg(a.especie);
 
   const handleCambiarZona = () => setShowZona(true);
 
@@ -488,7 +482,7 @@ export function AnimalModal({ animal, onClose }: Props) {
                       <ActionBtn
                         label="Registrar tratamiento"
                         color="text-gray-700"
-                        onClick={handleRegistrarTratamiento}
+                        onClick={() => setShowConfirmTrat(true)}
                       />
                     )}
                     {puedeActualizarEstado && (
@@ -542,6 +536,43 @@ export function AnimalModal({ animal, onClose }: Props) {
             onClose();
           }}
         />
+      )}
+
+      {/* Confirmación antes de ir a registrar tratamiento */}
+      {showConfirmTrat && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowConfirmTrat(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 className="text-base font-semibold text-gray-900 mb-2">
+              Registrar tratamiento
+            </h3>
+            <p className="text-sm text-gray-600 mb-5">
+              Vas a ir a la sección de tratamientos con{" "}
+              <span className="font-medium text-gray-900">{a.nombre}</span> ya
+              seleccionado. ¿Deseas continuar?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmTrat(false)}
+                className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmTrat(false);
+                  handleRegistrarTratamiento();
+                }}
+                className="flex-1 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-xl transition-colors"
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

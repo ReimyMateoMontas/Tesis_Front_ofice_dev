@@ -11,6 +11,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/hooks";
 import { logout } from "../../store/authSlice";
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { axiosClient } from "../../api/axiosClient";
 
@@ -109,6 +110,7 @@ export function Topbar() {
 
   const menuRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const notificaciones = useNotificaciones();
   const sinLeer = notificaciones.filter((n) => !leidasIds.has(n.id));
@@ -119,7 +121,11 @@ export function Topbar() {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node))
         setMenuOpen(false);
-      if (bellRef.current && !bellRef.current.contains(e.target as Node))
+      if (
+        bellRef.current &&
+        !bellRef.current.contains(e.target as Node) &&
+        (!panelRef.current || !panelRef.current.contains(e.target as Node))
+      )
         setBellOpen(false);
     };
     document.addEventListener("mousedown", handler);
@@ -141,7 +147,7 @@ export function Topbar() {
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-100 px-8 flex items-center justify-between flex-shrink-0 z-30 shadow-sm">
+    <header className="h-16 bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 flex items-center justify-between flex-shrink-0 z-30 shadow-sm">
       {/* Lado Izquierdo: Título Dinámico */}
       <div className="flex flex-col">
         <h1 className="text-lg font-bold text-gray-900 tracking-tight leading-none">
@@ -152,7 +158,7 @@ export function Topbar() {
         </p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Campanita de Notificaciones */}
         <div ref={bellRef} className="relative">
           <button
@@ -172,8 +178,12 @@ export function Topbar() {
             )}
           </button>
 
-          {bellOpen && (
-            <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          {bellOpen &&
+            createPortal(
+              <div
+                ref={panelRef}
+                className="fixed top-16 right-3 sm:right-6 lg:right-8 w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[60] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+              >
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
                 <span className="text-sm font-bold text-gray-900">
                   Notificaciones
@@ -233,8 +243,9 @@ export function Topbar() {
                   })
                 )}
               </div>
-            </div>
-          )}
+              </div>,
+              document.body,
+            )}
         </div>
 
         {/* Separador */}
@@ -295,7 +306,7 @@ export function Topbar() {
 
           {/* Dropdown Menú */}
           {menuOpen && (
-            <div className="absolute right-0 top-14 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 top-14 w-56 max-w-[calc(100vw-5rem)] bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="px-4 py-3 border-b border-gray-50 mb-1">
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">
                   Cuenta

@@ -13,6 +13,173 @@ interface Props {
 
 const inputClass =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white";
+const inputError =
+  "w-full border border-red-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent bg-white";
+
+// ── Reglas de validación por país ─────────────────────────────────────────────
+// Para cada país se define: prefijo telefónico, longitud(es) válidas del número
+// nacional, y las reglas de Cédula y Pasaporte (con su formato y ayuda).
+type DocRule = { placeholder: string; help: string; test: (v: string) => boolean };
+type Country = {
+  code: string;
+  name: string;
+  dial: string;
+  phoneLen: number[]; // dígitos válidos del número nacional
+  phonePlaceholder: string;
+  cedula: DocRule;
+  pasaporte: DocRule;
+};
+
+const onlyDigits = (v: string) => v.replace(/\D/g, "");
+// Pasaporte genérico: 6 a 9 caracteres alfanuméricos (cubre la mayoría de países)
+const pasaporteGenerico: DocRule = {
+  placeholder: "Ej: AB1234567",
+  help: "6 a 9 caracteres (letras y números).",
+  test: (v) => /^[A-Za-z0-9]{6,9}$/.test(v.trim()),
+};
+
+const COUNTRIES: Country[] = [
+  {
+    code: "DO",
+    name: "República Dominicana",
+    dial: "+1",
+    phoneLen: [10],
+    phonePlaceholder: "809 123 4567",
+    cedula: {
+      placeholder: "402-1234567-8",
+      help: "11 dígitos (000-0000000-0).",
+      test: (v) => onlyDigits(v).length === 11,
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "US",
+    name: "Estados Unidos",
+    dial: "+1",
+    phoneLen: [10],
+    phonePlaceholder: "212 555 0198",
+    cedula: {
+      placeholder: "123-45-6789",
+      help: "9 dígitos (SSN).",
+      test: (v) => onlyDigits(v).length === 9,
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "ES",
+    name: "España",
+    dial: "+34",
+    phoneLen: [9],
+    phonePlaceholder: "612 345 678",
+    cedula: {
+      placeholder: "12345678A",
+      help: "DNI: 8 dígitos + 1 letra. NIE: X/Y/Z + 7 dígitos + letra.",
+      test: (v) =>
+        /^\d{8}[A-Za-z]$/.test(v.trim()) ||
+        /^[XYZxyz]\d{7}[A-Za-z]$/.test(v.trim()),
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "MX",
+    name: "México",
+    dial: "+52",
+    phoneLen: [10],
+    phonePlaceholder: "55 1234 5678",
+    cedula: {
+      placeholder: "GOMC900101HDFXXX01",
+      help: "CURP: 18 caracteres (letras y números).",
+      test: (v) => /^[A-Za-z0-9]{18}$/.test(v.trim()),
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "CO",
+    name: "Colombia",
+    dial: "+57",
+    phoneLen: [10],
+    phonePlaceholder: "310 123 4567",
+    cedula: {
+      placeholder: "1012345678",
+      help: "Cédula: 6 a 10 dígitos.",
+      test: (v) => {
+        const d = onlyDigits(v);
+        return d.length >= 6 && d.length <= 10;
+      },
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "VE",
+    name: "Venezuela",
+    dial: "+58",
+    phoneLen: [10],
+    phonePlaceholder: "412 123 4567",
+    cedula: {
+      placeholder: "V-12345678",
+      help: "V o E + 6 a 9 dígitos.",
+      test: (v) => /^[VEve]-?\d{6,9}$/.test(v.trim()),
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "EC",
+    name: "Ecuador",
+    dial: "+593",
+    phoneLen: [9],
+    phonePlaceholder: "99 123 4567",
+    cedula: {
+      placeholder: "1712345678",
+      help: "Cédula: 10 dígitos.",
+      test: (v) => onlyDigits(v).length === 10,
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "PE",
+    name: "Perú",
+    dial: "+51",
+    phoneLen: [9],
+    phonePlaceholder: "912 345 678",
+    cedula: {
+      placeholder: "12345678",
+      help: "DNI: 8 dígitos.",
+      test: (v) => onlyDigits(v).length === 8,
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "AR",
+    name: "Argentina",
+    dial: "+54",
+    phoneLen: [10],
+    phonePlaceholder: "11 2345 6789",
+    cedula: {
+      placeholder: "12345678",
+      help: "DNI: 7 u 8 dígitos.",
+      test: (v) => {
+        const d = onlyDigits(v);
+        return d.length === 7 || d.length === 8;
+      },
+    },
+    pasaporte: pasaporteGenerico,
+  },
+  {
+    code: "CL",
+    name: "Chile",
+    dial: "+56",
+    phoneLen: [9],
+    phonePlaceholder: "9 1234 5678",
+    cedula: {
+      placeholder: "12345678-9",
+      help: "RUN: 7 u 8 dígitos + dígito verificador (0-9 o K).",
+      test: (v) => /^\d{7,8}-?[\dkK]$/.test(v.trim()),
+    },
+    pasaporte: pasaporteGenerico,
+  },
+];
+
+const emailValido = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
   const user = useAppSelector((s) => s.auth.user);
@@ -21,12 +188,18 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
   const [form, setForm] = useState({
     animalId: preselectedAnimalId ? String(preselectedAnimalId) : "",
     nombreAdoptante: "",
+    paisCode: "DO",
+    tipoDoc: "Cedula" as "Cedula" | "Pasaporte",
     documentoIdentidad: "",
     telefonoAdoptante: "",
     emailAdoptante: "",
     direccionAdoptante: "",
     observaciones: "",
   });
+  const [touched, setTouched] = useState(false);
+
+  const pais = COUNTRIES.find((c) => c.code === form.paisCode) ?? COUNTRIES[0];
+  const docRule = form.tipoDoc === "Cedula" ? pais.cedula : pais.pasaporte;
 
   const { data: animales = [] } = useQuery({
     queryKey: ["animales-disponibles"],
@@ -40,11 +213,13 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
     mutationFn: () =>
       adopcionApi.registrar({
         animalId: Number(form.animalId),
-        nombreAdoptante: form.nombreAdoptante,
-        telefonoAdoptante: form.telefonoAdoptante || undefined,
-        emailAdoptante: form.emailAdoptante || undefined,
-        direccionAdoptante: form.direccionAdoptante || undefined,
-        documentoIdentidad: form.documentoIdentidad || undefined,
+        nombreAdoptante: form.nombreAdoptante.trim(),
+        // Se guarda con prefijo internacional para dejar constancia del país.
+        telefonoAdoptante: `${pais.dial} ${onlyDigits(form.telefonoAdoptante)}`,
+        emailAdoptante: form.emailAdoptante.trim() || undefined,
+        direccionAdoptante: form.direccionAdoptante.trim() || undefined,
+        // Se guarda el tipo de documento junto al número.
+        documentoIdentidad: `${form.tipoDoc === "Cedula" ? "Cédula" : "Pasaporte"}: ${form.documentoIdentidad.trim()}`,
         fechaAdopcion: new Date().toISOString().split("T")[0],
         usuarioResponsableId: user!.id,
       }),
@@ -64,13 +239,27 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
   const set = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  // Validaciones individuales
+  const docValido = docRule.test(form.documentoIdentidad);
+  const telValido = pais.phoneLen.includes(onlyDigits(form.telefonoAdoptante).length);
+  const mailValido = emailValido(form.emailAdoptante);
+
   const canSubmit =
-    form.animalId &&
-    form.nombreAdoptante &&
-    form.documentoIdentidad &&
-    form.telefonoAdoptante &&
-    form.emailAdoptante &&
-    form.direccionAdoptante;
+    !!form.animalId &&
+    !!form.nombreAdoptante.trim() &&
+    docValido &&
+    telValido &&
+    mailValido &&
+    !!form.direccionAdoptante.trim();
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (!canSubmit) {
+      toast.error("Revisa los campos marcados en rojo.");
+      return;
+    }
+    mutation.mutate();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -112,29 +301,82 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
             </select>
           </div>
 
-          {/* Nombre + Documento */}
+          {/* Nombre */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Nombre del Adoptante *
+            </label>
+            <input
+              value={form.nombreAdoptante}
+              onChange={(e) => set("nombreAdoptante", e.target.value)}
+              placeholder="Nombre completo"
+              className={inputClass}
+            />
+          </div>
+
+          {/* País */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              País *
+            </label>
+            <select
+              value={form.paisCode}
+              onChange={(e) => {
+                // Al cambiar de país se limpian documento y teléfono para evitar
+                // mezclar formatos de países distintos.
+                setForm((prev) => ({
+                  ...prev,
+                  paisCode: e.target.value,
+                  documentoIdentidad: "",
+                  telefonoAdoptante: "",
+                }));
+              }}
+              className={inputClass}
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name} ({c.dial})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tipo de documento + Número */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Nombre del Adoptante *
+                Tipo de Documento *
               </label>
-              <input
-                value={form.nombreAdoptante}
-                onChange={(e) => set("nombreAdoptante", e.target.value)}
-                placeholder="Nombre completo"
+              <select
+                value={form.tipoDoc}
+                onChange={(e) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    tipoDoc: e.target.value as "Cedula" | "Pasaporte",
+                    documentoIdentidad: "",
+                  }));
+                }}
                 className={inputClass}
-              />
+              >
+                <option value="Cedula">Cédula</option>
+                <option value="Pasaporte">Pasaporte</option>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Documento de Identidad *
+                Número de Documento *
               </label>
               <input
                 value={form.documentoIdentidad}
                 onChange={(e) => set("documentoIdentidad", e.target.value)}
-                placeholder="Cédula, pasaporte, etc."
-                className={inputClass}
+                placeholder={docRule.placeholder}
+                className={touched && !docValido ? inputError : inputClass}
               />
+              <p
+                className={`text-xs mt-1 ${touched && !docValido ? "text-red-500" : "text-gray-400"}`}
+              >
+                {docRule.help}
+              </p>
             </div>
           </div>
 
@@ -144,12 +386,22 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Teléfono *
               </label>
-              <input
-                value={form.telefonoAdoptante}
-                onChange={(e) => set("telefonoAdoptante", e.target.value)}
-                placeholder="+1 809-000-0000"
-                className={inputClass}
-              />
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-50 text-sm text-gray-600">
+                  {pais.dial}
+                </span>
+                <input
+                  value={form.telefonoAdoptante}
+                  onChange={(e) => set("telefonoAdoptante", e.target.value)}
+                  placeholder={pais.phonePlaceholder}
+                  className={`${touched && !telValido ? inputError : inputClass} rounded-l-none`}
+                />
+              </div>
+              <p
+                className={`text-xs mt-1 ${touched && !telValido ? "text-red-500" : "text-gray-400"}`}
+              >
+                {pais.phoneLen.join(" o ")} dígitos.
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -160,8 +412,13 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
                 value={form.emailAdoptante}
                 onChange={(e) => set("emailAdoptante", e.target.value)}
                 placeholder="correo@ejemplo.com"
-                className={inputClass}
+                className={touched && !mailValido ? inputError : inputClass}
               />
+              {touched && !mailValido && (
+                <p className="text-xs mt-1 text-red-500">
+                  Ingresa un correo válido.
+                </p>
+              )}
             </div>
           </div>
 
@@ -202,8 +459,8 @@ export function AdopcionFormModal({ onClose, preselectedAnimalId }: Props) {
             Cancelar
           </button>
           <button
-            onClick={() => mutation.mutate()}
-            disabled={!canSubmit || mutation.isPending}
+            onClick={handleSubmit}
+            disabled={mutation.isPending}
             className="flex-1 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-green-300 rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             {mutation.isPending ? (
