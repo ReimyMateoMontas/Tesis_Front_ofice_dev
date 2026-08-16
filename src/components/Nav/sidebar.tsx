@@ -15,7 +15,7 @@ import {
   IconHome,
 } from "@tabler/icons-react";
 import { useAppSelector } from "../../hooks/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   {
@@ -77,24 +77,57 @@ const navItems = [
 export function Sidebar() {
   const user = useAppSelector((s) => s.auth.user);
   const [collapsed, setCollapsed] = useState(false);
+  const [isResponsive, setIsResponsive] = useState(false);
 
   const visible = navItems.filter(
     (item) => user && item.roles.includes(user.rol),
   );
+  const sidebarWidth = collapsed ? "w-[76px]" : "w-60";
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setIsResponsive(event.matches);
+      if (event.matches) setCollapsed(true);
+    };
+
+    handleChange(mediaQuery);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   return (
-    <aside
-      className={`group/sidebar relative flex flex-col flex-shrink-2 bg-white border-r border-gray-100
-        transition-all duration-300 ease-in-out z-40
-        ${collapsed ? "w-[76px]" : "w-60"}`}
+    <div
+      className={`relative flex-shrink-0 transition-all duration-300 ease-in-out ${
+        isResponsive ? "w-0" : sidebarWidth
+      }`}
     >
+      {isResponsive && !collapsed && (
+        <button
+          type="button"
+          aria-label="Cerrar menu lateral"
+          onClick={() => setCollapsed(true)}
+          className="fixed inset-0 z-30 bg-gray-900/15 backdrop-blur-[1px] md:hidden"
+        />
+      )}
+
+      <aside
+        className={`group/sidebar flex h-full flex-col bg-white border-r border-gray-100
+        transition-all duration-300 ease-in-out z-40
+        ${isResponsive ? "fixed inset-y-0 left-0 shadow-xl" : "relative"}
+        ${sidebarWidth}`}
+      >
       {/* Botón de Colapso */}
       <button
+        type="button"
+        aria-label={collapsed ? "Abrir menu lateral" : "Cerrar menu lateral"}
         onClick={() => setCollapsed((p) => !p)}
         className="absolute -right-3 top-6 z-50 w-6 h-6 bg-white border border-gray-200
           rounded-full flex items-center justify-center shadow-md
           text-gray-400 hover:text-green-600 hover:border-green-300 
-          transition-all duration-300 opacity-0 group-hover/sidebar:opacity-100"
+          transition-all duration-300 md:opacity-0 md:group-hover/sidebar:opacity-100"
       >
         {collapsed ? (
           <IconChevronRight size={14} stroke={2.5} />
@@ -213,6 +246,7 @@ export function Sidebar() {
           )}
         </div>
       </div>
-    </aside>
+      </aside>
+    </div>
   );
 }

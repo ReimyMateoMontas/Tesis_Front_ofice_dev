@@ -14,6 +14,7 @@ import { AdopcionFormModal } from "./AdopcionFormModal";
 import { AdopcionDetalleModal } from "./AdopcionDetalleModal";
 import { ESTADO_CONFIG } from "../../components/AdopcionConstants";
 import { useAppSelector } from "../../hooks/hooks";
+import { ActionButton } from "../../components/ActionButton";
 import type { Adopcion } from "../../types/index";
 import toast from "react-hot-toast";
 
@@ -68,8 +69,8 @@ export function Adopciones() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="min-w-0 flex-1 basis-full min-[560px]:basis-auto">
           <h2 className="text-xl font-semibold text-gray-900">
             Gestión de Adopciones
           </h2>
@@ -78,13 +79,14 @@ export function Adopciones() {
           </p>
         </div>
         {isAdmin && (
-          <button
+          <ActionButton
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+            className="w-full min-[560px]:w-auto"
           >
             <Plus className="w-4 h-4" />
-            Registrar Adopción
-          </button>
+            <span className="hidden sm:inline">Registrar Adopción</span>
+            <span className="sm:hidden">Registrar</span>
+          </ActionButton>
         )}
       </div>
 
@@ -216,17 +218,18 @@ export function Adopciones() {
                     </td>
 
                     {/* Estado */}
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-4 min-w-[120px] whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${cfg.badge}`}
+                        className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium leading-none ${cfg.badge}`}
                       >
-                        {cfg.icon} {cfg.label}
+                        <span className="flex-shrink-0">{cfg.icon}</span>
+                        <span>{cfg.label}</span>
                       </span>
                     </td>
 
                     {/* Acciones */}
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-5 py-4 min-w-[112px] whitespace-nowrap">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
                         {/* Ver detalle */}
                         <button
                           onClick={() => setSelected(a)}

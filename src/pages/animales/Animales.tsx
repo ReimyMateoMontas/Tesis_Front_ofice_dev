@@ -7,6 +7,7 @@ import { AnimalModal } from "./AnimalModal";
 import { AnimalFormModal } from "./AnimalFormModal";
 import { useAppSelector } from "../../hooks/hooks";
 import { formatearEdad } from "../../utils/Edad";
+import { ActionButton } from "../../components/ActionButton";
 
 // Imágenes locales por defecto — colócalas en src/assets/
 import perroImg from "../../assets/Perro.jpg";
@@ -95,10 +96,10 @@ export function Animales() {
   });
 
   return (
-    <div>
+    <div className="w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <div className="min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+        <div className="min-w-0 flex-1 basis-full min-[560px]:basis-auto">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
             Gestión de Animales
           </h2>
@@ -107,21 +108,19 @@ export function Animales() {
           </p>
         </div>
         {puedeRegistrar && (
-          <button
+          <ActionButton
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700
-              text-white text-sm font-medium px-3 sm:px-4 py-2 rounded-xl
-              transition-colors flex-shrink-0 whitespace-nowrap"
+            className="w-full min-[560px]:w-auto"
           >
             <IconPlus size={16} stroke={2} />
             <span className="hidden sm:inline">Registrar Animal</span>
             <span className="sm:hidden">Registrar</span>
-          </button>
+          </ActionButton>
         )}
       </div>
 
       {/* Buscador — fila completa */}
-      <div className="relative mb-3">
+      <div className="relative mb-3 w-full max-w-full">
         <IconSearch
           size={16}
           stroke={1.8}
@@ -131,18 +130,18 @@ export function Animales() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nombre o raza..."
-          className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl
+          className="w-full min-w-0 pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl
             focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
         />
       </div>
 
       {/* Filtros — segunda fila */}
-      <div className="flex gap-2 mb-5">
+      <div className="grid grid-cols-1 min-[430px]:grid-cols-2 gap-2 mb-5 w-full max-w-full">
         {/* Especie */}
         <select
           value={especie}
           onChange={(e) => setEspecie(e.target.value)}
-          className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-xl
+          className="w-full min-w-0 px-3 py-2.5 text-sm border border-gray-200 rounded-xl
             focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-600"
         >
           <option value="">Todas las especies</option>
@@ -156,7 +155,7 @@ export function Animales() {
         <select
           value={estado}
           onChange={(e) => setEstado(e.target.value)}
-          className="flex-1 px-3 py-2.5 text-sm border border-gray-200 rounded-xl
+          className="w-full min-w-0 px-3 py-2.5 text-sm border border-gray-200 rounded-xl
             focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-600"
         >
           <option value="">Todos los estados</option>
@@ -184,7 +183,7 @@ export function Animales() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
           {filtered.map((animal) => (
             <AnimalCard
               key={animal.id}
@@ -230,7 +229,7 @@ function AnimalCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
+      className="min-w-0 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
         hover:shadow-lg transition-all cursor-pointer hover:-translate-y-1 flex flex-col h-full"
     >
       {/* Imagen */}

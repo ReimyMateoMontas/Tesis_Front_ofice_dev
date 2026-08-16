@@ -4,6 +4,7 @@ import { AlertTriangle, Plus, Package, TrendingDown } from "lucide-react";
 import { inventarioApi } from "../../api/inventarioApi";
 import { EntradaModal } from "./EntradaModal";
 import { SalidaModal } from "./SalidaModal";
+import { ActionButton } from "../../components/ActionButton";
 import type { Alimento, MovimientoInventario } from "../../types/index";
 
 const TIPO_COLOR: Record<string, string> = {
@@ -272,8 +273,8 @@ export function Inventario() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="min-w-0 flex-1 basis-full min-[560px]:basis-auto">
           <h2 className="text-xl font-semibold text-gray-900">
             Inventario de Alimentos
           </h2>
@@ -281,21 +282,24 @@ export function Inventario() {
             Control de stock y movimientos
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
+        <div className="grid w-full grid-cols-2 gap-2 min-[560px]:flex min-[560px]:w-auto">
+          <ActionButton
+            variant="outline"
             onClick={() => setShowSalida(true)}
-            className="flex items-center gap-2 text-gray-600 border border-gray-200 text-sm font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+            className="min-w-0 px-3"
           >
             <TrendingDown className="w-4 h-4" />
-            Registrar Salida
-          </button>
-          <button
+            <span className="hidden sm:inline">Registrar Salida</span>
+            <span className="sm:hidden">Salida</span>
+          </ActionButton>
+          <ActionButton
             onClick={() => setShowEntrada(true)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+            className="min-w-0 px-3"
           >
             <Plus className="w-4 h-4" />
-            Registrar Entrada
-          </button>
+            <span className="hidden sm:inline">Registrar Entrada</span>
+            <span className="sm:hidden">Entrada</span>
+          </ActionButton>
         </div>
       </div>
 

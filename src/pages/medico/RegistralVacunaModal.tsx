@@ -132,7 +132,6 @@ export function RegistrarVacunaModal({
               {tiposVacuna.map((t: any) => (
                 <option key={t.id} value={t.id}>
                   {t.nombre}
-                  {t.obligatoria ? " ★" : ""}
                 </option>
               ))}
             </select>

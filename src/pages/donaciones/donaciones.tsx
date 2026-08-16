@@ -14,6 +14,7 @@ import {
 import toast from "react-hot-toast";
 import { donacionApi } from "../../api/donacionApi";
 import { useAppSelector } from "../../hooks/hooks";
+import { ActionButton } from "../../components/ActionButton";
 import type { Donacion, Objetivo } from "../../types/index";
 
 const inputClass =
@@ -879,8 +880,8 @@ export function Donaciones() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="min-w-0 flex-1 basis-full min-[560px]:basis-auto">
           <h2 className="text-xl font-semibold text-gray-900">
             Donaciones y Objetivos
           </h2>
@@ -888,23 +889,26 @@ export function Donaciones() {
             Control de aportes y metas del refugio
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid w-full grid-cols-1 gap-2 min-[380px]:grid-cols-2 min-[560px]:flex min-[560px]:w-auto min-[560px]:justify-end">
           {isAdmin && tab === "objetivos" && (
-            <button
+            <ActionButton
+              variant="secondary"
               onClick={() => setShowObjetivo(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+              className="min-w-0 px-3"
             >
               <Target className="w-4 h-4" />
-              Nuevo Objetivo
-            </button>
+              <span className="hidden sm:inline">Nuevo Objetivo</span>
+              <span className="sm:hidden">Nuevo</span>
+            </ActionButton>
           )}
-          <button
+          <ActionButton
             onClick={() => setShowDonacion(true)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+            className="min-w-0 px-3"
           >
             <Plus className="w-4 h-4" />
-            Registrar Donación
-          </button>
+            <span className="hidden sm:inline">Registrar Donación</span>
+            <span className="sm:hidden">Registrar</span>
+          </ActionButton>
         </div>
       </div>
 

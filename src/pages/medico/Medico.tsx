@@ -18,6 +18,7 @@ import { NuevoTratamientoModal } from "./NuevoTratamientoModal";
 import { RegistrarVacunaModal } from "./RegistralVacunaModal";
 import { RegistrarFallecimientoModal } from "./RegistrarFallecimientoModal";
 import { useAppSelector } from "../../hooks/hooks";
+import { ActionButton } from "../../components/ActionButton";
 import type { Tratamiento } from "../../types/index";
 
 const PLACEHOLDER =
@@ -314,8 +315,8 @@ export function Medico() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="min-w-0 flex-1 basis-full min-[560px]:basis-auto">
           <h2 className="text-xl font-semibold text-gray-900">
             Gestión Médica
           </h2>
@@ -325,17 +326,17 @@ export function Medico() {
         </div>
 
         {canEdit && (
-          <div className="relative">
-            <button
+          <div className="relative w-full min-[560px]:w-auto">
+            <ActionButton
               onClick={() => setMenuAbierto((p) => !p)}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+              className="w-full min-[560px]:w-auto"
             >
               <Plus className="w-4 h-4" />
               Nuevo
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${menuAbierto ? "rotate-180" : ""}`}
               />
-            </button>
+            </ActionButton>
 
             {menuAbierto && (
               <>
@@ -616,19 +617,14 @@ function VacunaCard({ v }: { v: any }) {
       className={`bg-white rounded-2xl border p-5 ${v.vencida ? "border-red-100 bg-red-50/20" : "border-gray-100"}`}
     >
       <div className="flex items-start gap-4">
-        <div className="relative">
-          <img
-            src={v.fotografiaUrl?.trim() || PLACEHOLDER}
-            alt={v.animal}
-            className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = PLACEHOLDER;
-            }}
-          />
-          <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-            <Syringe className="w-3 h-3 text-white" />
-          </div>
-        </div>
+        <img
+          src={v.fotografiaUrl?.trim() || PLACEHOLDER}
+          alt={v.animal}
+          className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = PLACEHOLDER;
+          }}
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <h3 className="font-semibold text-gray-900">{v.animal}</h3>
@@ -668,7 +664,7 @@ function VacunaCard({ v }: { v: any }) {
           )}
           {v.vencida && (
             <p className="text-xs mt-2 text-red-500 font-medium">
-              ⚠ Vacuna vencida — requiere renovación
+              Vacuna vencida - requiere renovacion
             </p>
           )}
         </div>

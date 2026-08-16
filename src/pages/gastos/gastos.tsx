@@ -16,6 +16,7 @@ import { gastoApi } from "../../api/gastosApi";
 import { inventarioApi } from "../../api/inventarioApi";
 import { EntradaModal } from "../inventario/EntradaModal";
 import { useAppSelector } from "../../hooks/hooks";
+import { ActionButton } from "../../components/ActionButton";
 import type { Gasto, CategoriaGasto } from "../../types/index";
 
 const FORMAS_PAGO = ["Efectivo", "Transferencia", "Tarjeta", "Cheque"];
@@ -394,29 +395,20 @@ function PieChart({
   if (!data.length)
     return <p className="text-sm text-gray-400 text-center py-8">Sin datos</p>;
 
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
   const option = {
     tooltip: {
       trigger: "item",
       formatter: (p: any) =>
         `${p.name}<br/>RD$ ${p.value.toLocaleString("es-DO")} (${p.percent}%)`,
     },
-    legend: {
-      orient: "vertical",
-      right: 0,
-      top: "center",
-      itemWidth: 10,
-      itemHeight: 10,
-      textStyle: { fontSize: 11, color: "#6b7280" },
-      formatter: (name: string) => {
-        const item = data.find((d) => d.label === name);
-        return `${name}  RD$ ${item?.value.toLocaleString("es-DO") ?? 0}`;
-      },
-    },
+    legend: { show: false },
     series: [
       {
         type: "pie",
         radius: ["42%", "68%"],
-        center: ["30%", "50%"],
+        center: ["50%", "50%"],
         label: { show: false },
         emphasis: { label: { show: true, fontSize: 12, fontWeight: "bold" } },
         data: data.map((d) => ({
@@ -428,7 +420,35 @@ function PieChart({
     ],
   };
 
-  return <ReactECharts option={option} style={{ height: 200 }} />;
+  return (
+    <div>
+      <ReactECharts option={option} style={{ height: 150 }} />
+      <div className="mt-2 space-y-1.5">
+        {data.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center justify-between gap-3 text-xs"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="truncate text-gray-600">{item.label}</span>
+            </div>
+            <div className="flex flex-shrink-0 items-center gap-2 font-semibold text-gray-900">
+              <span>RD$ {item.value.toLocaleString("es-DO")}</span>
+              {total > 0 && (
+                <span className="text-gray-400">
+                  {Math.round((item.value / total) * 100)}%
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ── ECharts: Barras mensuales ─────────────────────────────────────────────────
@@ -597,8 +617,8 @@ export function Gastos() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div className="min-w-0 flex-1 basis-full min-[560px]:basis-auto">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
             Gestión de Gastos
           </h2>
@@ -606,15 +626,14 @@ export function Gastos() {
             Control financiero del albergue
           </p>
         </div>
-        <button
+        <ActionButton
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white
-            text-sm font-medium px-3 sm:px-4 py-2 rounded-xl transition-colors flex-shrink-0 whitespace-nowrap"
+          className="w-full min-[560px]:w-auto"
         >
           <IconPlus size={16} stroke={2} />
           <span className="hidden sm:inline">Registrar Gasto</span>
           <span className="sm:hidden">Registrar</span>
-        </button>
+        </ActionButton>
       </div>
 
       {/* Stats — 1 col móvil, 3 desktop */}
