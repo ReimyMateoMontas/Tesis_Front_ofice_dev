@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Loader2, CheckCircle, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import type { AxiosError } from "axios";
 import { adopcionApi } from "../../api/adopcionesApi";
 import { ESTADO_CONFIG } from "../../components/AdopcionConstants";
 import type { Adopcion } from "../../types/index";
@@ -12,9 +13,11 @@ interface Props {
 
 function Field({ label, value }: { label: string; value?: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <p className="text-xs text-gray-400 mb-0.5">{label}:</p>
-      <p className="text-sm font-medium text-gray-900">{value || "—"}</p>
+      <p className="break-words text-sm font-medium text-gray-900 [overflow-wrap:anywhere]">
+        {value || "—"}
+      </p>
     </div>
   );
 }
@@ -36,8 +39,11 @@ export function AdopcionDetalleModal({ adopcion, onClose }: Props) {
       queryClient.invalidateQueries({ queryKey: ["adopcion", adopcion.id] });
       onClose();
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.mensaje ?? "Error al actualizar estado");
+    onError: (err: unknown) => {
+      const error = err as AxiosError<{ mensaje?: string }>;
+      toast.error(
+        error.response?.data?.mensaje ?? "Error al actualizar estado",
+      );
     },
   });
 
@@ -46,34 +52,36 @@ export function AdopcionDetalleModal({ adopcion, onClose }: Props) {
   const cfg = ESTADO_CONFIG[d.estadoAdopcion] ?? ESTADO_CONFIG["Pendiente"];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
-          <h2 className="text-base font-semibold text-gray-900">
+        <div className="z-10 flex shrink-0 items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-7 sm:py-5">
+          <h2 className="text-lg font-semibold text-gray-900">
             Detalles de Adopción
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            aria-label="Cerrar detalles de adopción"
+            className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-          </div>
-        ) : (
-          <div className="p-6 space-y-5">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+            </div>
+          ) : (
+          <div className="space-y-6 p-5 sm:p-7">
             {/* Animal */}
-            <div className="bg-gray-50 rounded-xl p-4">
+            <div className="rounded-xl bg-gray-50 p-4 sm:p-5">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
                 🐾 Animal
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                 <Field label="Nombre" value={d.animal} />
                 <Field label="Raza" value={d.raza} />
               </div>
@@ -84,7 +92,7 @@ export function AdopcionDetalleModal({ adopcion, onClose }: Props) {
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
                 👤 Información del Adoptante
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5">
                 <Field label="Nombre" value={d.nombreAdoptante} />
                 <Field label="Documento" value={d.documentoIdentidad} />
                 <Field label="Teléfono" value={d.telefonoAdoptante} />
@@ -102,7 +110,7 @@ export function AdopcionDetalleModal({ adopcion, onClose }: Props) {
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
                 📋 Información de Adopción
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5">
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Estado:</p>
                   <span
@@ -132,10 +140,11 @@ export function AdopcionDetalleModal({ adopcion, onClose }: Props) {
               )}
             </div>
           </div>
-        )}
+          )}
+        </div>
 
         {/* Footer con acciones */}
-        <div className="flex gap-3 px-6 pb-6">
+        <div className="flex shrink-0 flex-col gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:flex-row sm:px-7 sm:py-5">
           {esPendiente && (
             <>
               <button
