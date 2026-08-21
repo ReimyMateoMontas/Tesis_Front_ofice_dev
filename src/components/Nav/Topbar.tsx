@@ -93,6 +93,15 @@ function useNotificaciones() {
         link: "/adopcion",
         leida: false,
       });
+    if (s.vacunasPendientes > 0 && rol !== "Trabajador")
+      notificaciones.push({
+        id: "vacunas",
+        tipo: "vencimiento",
+        titulo: "Vacunas por aplicar",
+        detalle: `${s.vacunasPendientes} vacuna(s) con dosis pendiente hoy o vencida`,
+        link: "/medico",
+        leida: false,
+      });
   }
   return notificaciones;
 }

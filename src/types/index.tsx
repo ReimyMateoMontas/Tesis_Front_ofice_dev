@@ -146,6 +146,7 @@ export interface Vacuna {
   veterinario: string;
   observaciones?: string;
   vencida: boolean;
+  estado?: "Pendiente" | "Completada";
 }
 
 export interface TipoVacuna {

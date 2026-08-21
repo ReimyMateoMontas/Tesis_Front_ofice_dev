@@ -47,6 +47,14 @@ export const medicoApi = {
   getTodasLasVacunas: () =>
     axiosClient.get("/vacuna/todas").then((r) => r.data),
 
+  actualizarEstadoVacuna: (id: number, estado: string) =>
+    axiosClient
+      .put(`/vacuna/${id}/estado`, { estado })
+      .then((r) => r.data),
+
+  getAlertasVacunas: () =>
+    axiosClient.get("/vacuna/alertas").then((r) => r.data),
+
   registrarVacuna: (dto: {
     animalId: number;
     tipoVacunaId: number;

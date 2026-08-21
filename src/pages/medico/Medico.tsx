@@ -29,6 +29,8 @@ const ESTADO_CONFIG: Record<string, { label: string; badge: string }> = {
   Vacuna: { label: "Vacuna", badge: "bg-blue-100  text-blue-700" },
   Vencida: { label: "Vencida", badge: "bg-red-100   text-red-600" },
   Fallecido: { label: "Fallecido", badge: "bg-red-100   text-red-700" },
+  Pendiente: { label: "Pendiente", badge: "bg-blue-100  text-blue-700" },
+  Completada: { label: "Finalizada", badge: "bg-green-100 text-green-700" },
 };
 
 type Filtro =
@@ -145,6 +147,29 @@ export function Medico() {
       toast.error(err.response?.data?.mensaje ?? "Error al actualizar"),
   });
 
+  // ── Mutación: estado de vacuna (marcar finalizada / reabrir) ────────────────
+  const mutEstadoVacuna = useMutation({
+    mutationFn: ({ id, estado }: { id: number; estado: string }) =>
+      medicoApi.actualizarEstadoVacuna(id, estado),
+    onSuccess: (_, { estado }) => {
+      toast.success(
+        estado === "Completada"
+          ? "Vacuna marcada como finalizada"
+          : "Vacuna marcada como pendiente",
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["vacunas-todas"],
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+        refetchType: "all",
+      });
+    },
+    onError: (err: any) =>
+      toast.error(err.response?.data?.mensaje ?? "Error al actualizar la vacuna"),
+  });
+
   // ── Búsqueda ───────────────────────────────────────────────────────────────
   const q = busqueda.toLowerCase().trim();
 
@@ -178,7 +203,7 @@ export function Medico() {
       );
       return dias <= 3 && dias >= 0;
     }),
-    ...vacunas.filter((v) => v.vencida),
+    ...vacunas.filter((v) => v.vencida && v.estado !== "Completada"),
   ];
 
   const isLoading = loadingT || loadingV || loadingF;
@@ -199,7 +224,12 @@ export function Medico() {
       return (
         <div className="space-y-3">
           {vFiltradas.map((v) => (
-            <VacunaCard key={v.id} v={v} />
+            <VacunaCard
+              key={v.id}
+              v={v}
+              canEdit={canEdit}
+              mutEstadoVacuna={mutEstadoVacuna}
+            />
           ))}
         </div>
       );
@@ -288,7 +318,12 @@ export function Medico() {
             color="text-blue-500"
           >
             {vFiltradas.map((v) => (
-              <VacunaCard key={v.id} v={v} />
+              <VacunaCard
+              key={v.id}
+              v={v}
+              canEdit={canEdit}
+              mutEstadoVacuna={mutEstadoVacuna}
+            />
             ))}
           </Seccion>
         )}
@@ -604,15 +639,37 @@ function TratamientoCard({
 }
 
 // ── Tarjeta: VACUNA ───────────────────────────────────────────────────────────
-function VacunaCard({ v }: { v: any }) {
-  const cfg = v.vencida ? ESTADO_CONFIG["Vencida"] : ESTADO_CONFIG["Vacuna"];
+function VacunaCard({
+  v,
+  canEdit,
+  mutEstadoVacuna,
+}: {
+  v: any;
+  canEdit?: boolean;
+  mutEstadoVacuna?: any;
+}) {
+  const finalizada = v.estado === "Completada";
+  // Prioridad del badge: Finalizada > Vencida > Vacuna
+  const cfg = finalizada
+    ? ESTADO_CONFIG["Completada"]
+    : v.vencida
+      ? ESTADO_CONFIG["Vencida"]
+      : ESTADO_CONFIG["Vacuna"];
   const diasProxima = v.proximaDosis
     ? Math.ceil((new Date(v.proximaDosis).getTime() - Date.now()) / 86400000)
     : null;
+  // Puede marcarse finalizada si sigue pendiente
+  const puedeFinalizar = canEdit && !finalizada;
 
   return (
     <div
-      className={`bg-white rounded-2xl border p-5 ${v.vencida ? "border-red-100 bg-red-50/20" : "border-gray-100"}`}
+      className={`bg-white rounded-2xl border p-5 ${
+        finalizada
+          ? "border-gray-100"
+          : v.vencida
+            ? "border-red-100 bg-red-50/20"
+            : "border-gray-100"
+      }`}
     >
       <div className="flex items-start gap-4">
         <img
@@ -651,19 +708,50 @@ function VacunaCard({ v }: { v: any }) {
             <Detail label="Lote" value={v.lote || "—"} />
             <Detail label="Veterinario" value={v.veterinario} />
           </div>
-          {diasProxima !== null && !v.vencida && diasProxima <= 30 && (
-            <p
-              className={`text-xs mt-2 ${diasProxima <= 7 ? "text-amber-600" : "text-gray-400"}`}
-            >
-              {diasProxima <= 0
-                ? "Próxima dosis: hoy"
-                : `Próxima dosis en ${diasProxima} día${diasProxima !== 1 ? "s" : ""}`}
-            </p>
-          )}
-          {v.vencida && (
+
+          {!finalizada &&
+            diasProxima !== null &&
+            !v.vencida &&
+            diasProxima <= 30 && (
+              <p
+                className={`text-xs mt-2 ${diasProxima <= 7 ? "text-amber-600" : "text-gray-400"}`}
+              >
+                {diasProxima <= 0
+                  ? "Próxima dosis: hoy"
+                  : `Próxima dosis en ${diasProxima} día${diasProxima !== 1 ? "s" : ""}`}
+              </p>
+            )}
+          {!finalizada && v.vencida && (
             <p className="text-xs mt-2 text-red-500 font-medium">
               Vacuna vencida - requiere renovacion
             </p>
+          )}
+
+          {(puedeFinalizar || finalizada) && (
+            <div className="flex items-center justify-end mt-3 gap-2">
+              {puedeFinalizar && (
+                <button
+                  onClick={() =>
+                    mutEstadoVacuna?.mutate({ id: v.id, estado: "Completada" })
+                  }
+                  disabled={mutEstadoVacuna?.isPending}
+                  className="text-xs text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors font-medium disabled:opacity-50"
+                >
+                  ✓ Marcar finalizada
+                </button>
+              )}
+              {finalizada && canEdit && (
+                <button
+                  onClick={() =>
+                    mutEstadoVacuna?.mutate({ id: v.id, estado: "Pendiente" })
+                  }
+                  disabled={mutEstadoVacuna?.isPending}
+                  className="text-xs text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors font-medium disabled:opacity-50"
+                >
+                  ↺ Reabrir
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

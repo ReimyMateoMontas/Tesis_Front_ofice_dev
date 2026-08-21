@@ -59,7 +59,11 @@ const ACTIVIDAD_CONFIG: Record<
 
 function tiempoRelativo(fecha: string | null): string {
   if (!fecha) return "—";
-  const diff = Date.now() - new Date(fecha).getTime();
+  const t = new Date(fecha).getTime();
+  if (isNaN(t)) return "—";
+  const diff = Date.now() - t;
+  // Si la fecha es futura o prácticamente ahora, no mostrar valores negativos.
+  if (diff < 60000) return "Hace un momento";
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `Hace ${mins} min`;
   const hs = Math.floor(mins / 60);
