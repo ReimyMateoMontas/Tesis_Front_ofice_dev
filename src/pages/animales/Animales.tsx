@@ -221,7 +221,7 @@ function AnimalCard({
         hover:shadow-lg transition-all cursor-pointer hover:-translate-y-1 flex flex-col h-full"
     >
       {/* Imagen */}
-      <div className="relative h-48 w-full overflow-hidden bg-gray-50">
+      <div className="relative aspect-[16/7] w-full overflow-hidden bg-gray-100">
         <img
           src={
             animal.fotografiaUrl && animal.fotografiaUrl.trim() !== ""
@@ -229,7 +229,7 @@ function AnimalCard({
               : fallbackSrc
           }
           alt={animal.nombre}
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="h-full w-full object-cover"
           onError={(e) => {
             const img = e.target as HTMLImageElement;
             if (img.src !== fallbackSrc) img.src = fallbackSrc;

@@ -1,10 +1,17 @@
 import { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { IconX, IconLoader2, IconUpload, IconLink } from "@tabler/icons-react";
+import {
+  IconCrop,
+  IconX,
+  IconLoader2,
+  IconUpload,
+  IconLink,
+} from "@tabler/icons-react";
 import toast from "react-hot-toast";
 import { axiosClient } from "../../api/axiosClient";
 import { formatearEdad } from "../../utils/Edad";
 import type { Animal } from "../../types";
+import { ImageCropperModal } from "../../components/ImageCropperModal";
 
 interface Props {
   animal: Animal;
@@ -31,6 +38,7 @@ export function EditarAnimalModal({ animal, onClose }: Props) {
   });
 
   const [preview, setPreview] = useState(animal.fotografiaUrl ?? "");
+  const [cropSource, setCropSource] = useState<string | null>(null);
 
   const { data: especie = [] } = useQuery({
     queryKey: ["especie"],
@@ -46,17 +54,28 @@ export function EditarAnimalModal({ animal, onClose }: Props) {
       toast.error("El archivo debe ser una imagen");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("La imagen no puede superar 2MB");
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("La imagen original no puede superar 15MB");
+      e.target.value = "";
       return;
     }
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setPreview(base64);
-      set("fotografiaUrl", base64);
+      setCropSource(reader.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const applyCrop = (croppedImage: string) => {
+    setPreview(croppedImage);
+    set("fotografiaUrl", croppedImage);
+    setCropSource(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const cancelCrop = () => {
+    setCropSource(null);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,13 +262,21 @@ export function EditarAnimalModal({ animal, onClose }: Props) {
 
             {/* Preview */}
             {preview && (
-              <div className="mb-3 rounded-xl overflow-hidden h-36 bg-gray-100">
+              <div className="relative mb-3 aspect-[16/7] overflow-hidden rounded-xl bg-gray-100">
                 <img
                   src={preview}
                   alt="Preview"
                   className="w-full h-full object-cover"
                   onError={() => setPreview("")}
                 />
+                <button
+                  type="button"
+                  onClick={() => setCropSource(preview)}
+                  className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-lg bg-black/65 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+                >
+                  <IconCrop size={15} />
+                  Ajustar
+                </button>
               </div>
             )}
 
@@ -266,7 +293,9 @@ export function EditarAnimalModal({ animal, onClose }: Props) {
               <p className="text-sm text-gray-400">
                 Haz clic para subir una imagen
               </p>
-              <p className="text-xs text-gray-300 mt-0.5">PNG, JPG — máx 2MB</p>
+              <p className="text-xs text-gray-300 mt-0.5">
+                PNG, JPG o WEBP — máx 15MB
+              </p>
               <input
                 ref={fileRef}
                 type="file"
@@ -340,6 +369,14 @@ export function EditarAnimalModal({ animal, onClose }: Props) {
           </button>
         </div>
       </div>
+
+      {cropSource && (
+        <ImageCropperModal
+          imageSrc={cropSource}
+          onCancel={cancelCrop}
+          onConfirm={applyCrop}
+        />
+      )}
     </div>
   );
 }

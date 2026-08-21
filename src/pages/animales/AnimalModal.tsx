@@ -367,7 +367,7 @@ export function AnimalModal({ animal, onClose }: Props) {
             {/* Columna izquierda */}
             <div className="flex-1 space-y-4 min-w-0">
               {/* Foto */}
-              <div className="rounded-xl overflow-hidden bg-gray-200 h-72">
+              <div className="rounded-xl overflow-hidden bg-gray-100 h-72 flex items-center justify-center">
                 <img
                   src={
                     a.fotografiaUrl && a.fotografiaUrl.trim() !== ""
@@ -375,7 +375,7 @@ export function AnimalModal({ animal, onClose }: Props) {
                       : fallbackSrc
                   }
                   alt={a.nombre}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   onError={(e) => {
                     const img = e.target as HTMLImageElement;
                     if (img.src !== fallbackSrc) img.src = fallbackSrc;
