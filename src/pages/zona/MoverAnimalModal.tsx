@@ -96,12 +96,12 @@ export function MoverAnimalModal({
               <select
                 value={zonaDestinoId}
                 onChange={(e) => setZonaDestinoId(Number(e.target.value))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="">Selecciona una zona</option>
-                {zonasDisponibles.map((z) => (
-                  <option key={z.id} value={z.id}>
-                    {z.name} ({z.currentCapacity}/{z.maxCapacity})
+                {zonasDisponibles.map((zone) => (
+                  <option key={zone.id} value={zone.id}>
+                    {zone.name} ({zone.currentCapacity}/{zone.maxCapacity})
                   </option>
                 ))}
               </select>

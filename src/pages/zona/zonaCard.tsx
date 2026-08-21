@@ -1,4 +1,4 @@
-import { ZONE_COLORS } from "../../components/ZonaConstants";
+import { getZoneColor } from "../../components/ZonaConstants";
 import type { Zona } from "../../types/index";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function ZonaCard({ zona, colorIdx, isSelected, onClick }: Props) {
-  const c = ZONE_COLORS[colorIdx % ZONE_COLORS.length];
+  const c = getZoneColor(zona.name, colorIdx);
   const pct =
     zona.maxCapacity > 0
       ? Math.round((zona.currentCapacity / zona.maxCapacity) * 100)

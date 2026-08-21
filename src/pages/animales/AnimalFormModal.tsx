@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   IconCrop,
   IconX,
@@ -16,6 +16,7 @@ import { useAppSelector } from "../../hooks/hooks";
 import { axiosClient } from "../../api/axiosClient";
 import { formatearEdad } from "../../utils/Edad";
 import { ImageCropperModal } from "../../components/ImageCropperModal";
+import { isClinicalZone } from "../../components/ZonaConstants";
 
 const schema = z.object({
   nombre: z.string().min(1, "El nombre es requerido"),
@@ -39,21 +40,50 @@ interface Props {
   onSuccess: () => void;
 }
 
+interface RegistrationZone {
+  id: number;
+  nombre: string;
+}
+
+interface RawZone {
+  Id?: number;
+  id?: number;
+  Name?: string;
+  name?: string;
+  Nombre?: string;
+  nombre?: string;
+}
+
 export function AnimalFormModal({ onClose, onSuccess }: Props) {
   const user = useAppSelector((s) => s.auth.user);
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string>("");
   const [cropSource, setCropSource] = useState<string | null>(null);
+  const [selectedZoneId, setSelectedZoneId] = useState<
+    number | null | undefined
+  >(undefined);
 
-  const { data: zonas = [] } = useQuery({
+  const { data: zonas = [] } = useQuery<RegistrationZone[]>({
     queryKey: ["zonas"],
     queryFn: async () => {
       const { data } = await axiosClient.get("/zone");
-      return (Array.isArray(data) ? data : []).map((z: any) => ({
-        id: z.Id ?? z.id,
-        nombre: z.Name ?? z.name ?? z.Nombre ?? z.nombre ?? "Sin nombre",
-      }));
+      const rawZones: RawZone[] = Array.isArray(data) ? data : [];
+      return rawZones.reduce<RegistrationZone[]>((result, zone) => {
+        const id = zone.Id ?? zone.id;
+        if (typeof id !== "number") return result;
+
+        result.push({
+          id,
+          nombre:
+            zone.Name ??
+            zone.name ??
+            zone.Nombre ??
+            zone.nombre ??
+            "Sin nombre",
+        });
+        return result;
+      }, []);
     },
   });
 
@@ -72,6 +102,7 @@ export function AnimalFormModal({ onClose, onSuccess }: Props) {
   const {
     register,
     handleSubmit,
+    getValues,
     setValue,
     watch,
     formState: { errors },
@@ -79,6 +110,24 @@ export function AnimalFormModal({ onClose, onSuccess }: Props) {
     resolver: zodResolver(schema),
     defaultValues: { fechaIngreso: new Date().toISOString().split("T")[0] },
   });
+
+  const clinicalZone = zonas.find((zone) => isClinicalZone(zone.nombre));
+
+  useEffect(() => {
+    if (Number(getValues("zonaActualId")) > 0) return;
+
+    if (clinicalZone) {
+      setValue("zonaActualId", clinicalZone.id, { shouldValidate: true });
+    }
+  }, [clinicalZone, getValues, setValue]);
+
+  const effectiveZoneId =
+    selectedZoneId === undefined ? clinicalZone?.id : selectedZoneId;
+  const selectedZoneIndex = zonas.findIndex(
+    (zone) => zone.id === effectiveZoneId,
+  );
+  const selectedZone = zonas[selectedZoneIndex];
+  const zoneRegistration = register("zonaActualId");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -241,14 +290,27 @@ export function AnimalFormModal({ onClose, onSuccess }: Props) {
             </Field>
 
             <Field label="Zona actual *" error={errors.zonaActualId?.message}>
-              <select {...register("zonaActualId")} className={inputClass}>
+              <select
+                {...zoneRegistration}
+                onChange={(event) => {
+                  zoneRegistration.onChange(event);
+                  const zoneId = Number(event.target.value);
+                  setSelectedZoneId(zoneId > 0 ? zoneId : null);
+                }}
+                className={inputClass}
+              >
                 <option value="">Selecciona zona</option>
-                {zonas.map((z: any) => (
-                  <option key={z.id} value={z.id}>
-                    {z.nombre}
+                {zonas.map((zone) => (
+                  <option key={zone.id} value={zone.id}>
+                    {zone.nombre}
                   </option>
                 ))}
               </select>
+              {selectedZone && isClinicalZone(selectedZone.nombre) && (
+                <p className="mt-1.5 text-[11px] text-blue-600">
+                  Área clínica seleccionada automáticamente.
+                </p>
+              )}
             </Field>
 
             <Field label="Color" error={errors.color?.message}>

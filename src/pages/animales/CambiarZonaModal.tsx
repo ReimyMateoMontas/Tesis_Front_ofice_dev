@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { axiosClient } from "../../api/axiosClient";
 import { useAppSelector } from "../../hooks/hooks";
 import type { Animal } from "../../types";
+import { getZoneColor } from "../../components/ZonaConstants";
 
 interface Zona {
   id: number;
@@ -19,15 +20,6 @@ interface Props {
   animal: Animal;
   onClose: () => void;
 }
-
-const ZONE_COLORS = [
-  "bg-amber-100 text-amber-600",
-  "bg-green-100 text-green-600",
-  "bg-red-100 text-red-500",
-  "bg-blue-100 text-blue-600",
-  "bg-purple-100 text-purple-600",
-  "bg-pink-100 text-pink-600",
-];
 
 export function CambiarZonaModal({ animal, onClose }: Props) {
   const user = useAppSelector((s) => s.auth.user);
@@ -159,14 +151,15 @@ export function CambiarZonaModal({ animal, onClose }: Props) {
               </p>
             ) : (
               <div className="space-y-2 max-h-52 overflow-y-auto">
-                {zonasDisponibles.map((zona, idx) => {
+                {zonasDisponibles.map((zona) => {
                   const pct =
                     zona.maxCapacity > 0
                       ? Math.round(
                           (zona.currentCapacity / zona.maxCapacity) * 100,
                         )
                       : 0;
-                  const colorClass = ZONE_COLORS[idx % ZONE_COLORS.length];
+                  const zoneIndex = zonas.findIndex((z) => z.id === zona.id);
+                  const zoneColor = getZoneColor(zona.name, zoneIndex);
                   const isSelected = zonaDestinoId === zona.id;
 
                   return (
@@ -175,12 +168,12 @@ export function CambiarZonaModal({ animal, onClose }: Props) {
                       onClick={() => setZonaDestinoId(zona.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
                         isSelected
-                          ? "border-green-400 bg-green-50"
+                          ? zoneColor.selected
                           : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                       }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-lg ${colorClass} flex items-center justify-center flex-shrink-0`}
+                        className={`w-8 h-8 rounded-lg ${zoneColor.icon} flex items-center justify-center flex-shrink-0`}
                       >
                         <svg
                           className="w-4 h-4"
@@ -203,7 +196,7 @@ export function CambiarZonaModal({ animal, onClose }: Props) {
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex-1 bg-gray-100 rounded-full h-1.5">
                             <div
-                              className="h-1.5 rounded-full bg-green-500"
+                              className={`h-1.5 rounded-full ${zoneColor.bar}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -213,7 +206,9 @@ export function CambiarZonaModal({ animal, onClose }: Props) {
                         </div>
                       </div>
                       {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                        <div
+                          className={`w-5 h-5 rounded-full ${zoneColor.dot} flex items-center justify-center flex-shrink-0`}
+                        >
                           <svg
                             className="w-3 h-3 text-white"
                             fill="none"
